@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     static final int SELECTED = 3;
 
     public void init() {
-        
+        FirstInit.showCourseDialog(Parsing.readCourses(msiu.getAbsolutePath()));
         scrollView.addView(output(weekch));
     }
 
