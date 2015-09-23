@@ -3,7 +3,6 @@ package ele638.msiutimetable;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -22,6 +21,9 @@ import javax.net.ssl.HttpsURLConnection;
 
 class Downloading extends AsyncTask<String, Integer, Boolean>{
 
+    final int EXIT_CODE = 0;
+    final int DOWNLOAD_CODE = 1;
+    final int DOWNLOADED_FILE = 2;
     Context context;
     ProgressDialog pd;
     File mfile;
@@ -96,9 +98,8 @@ class Downloading extends AsyncTask<String, Integer, Boolean>{
     @Override
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
-        SystemClock.sleep(100);
-        FirstInit.showGroupDialog(Parsing.readGroups(context, mfile.getAbsolutePath()));
         pd.dismiss();
+        MainActivity.handler.sendEmptyMessage(DOWNLOADED_FILE);
     }
 
     @Override

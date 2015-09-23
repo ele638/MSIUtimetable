@@ -2,6 +2,8 @@ package ele638.msiutimetable;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,25 +18,25 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+
     private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
     ScrollView scrollView;
     static ArrayList<ArrayList> week;
     static ArrayList<ArrayList> weekch;
     static ArrayList<ArrayList> weeknech;
     File msiu;
+    ProgressDialog pd;
+
+    static Handler handler;
+    static final int EXIT_CODE = 0;
+    static final int DOWNLOAD_CODE = 1;
+    static final int DOWNLOADED_FILE = 2;
+    static final int SELECTED = 3;
 
     public void init() {
+        FirstInit.showCourseDialog(Parsing.readCourses(msiu.getAbsolutePath()));
         scrollView.addView(output(weekch));
     }
-
-    public void readFile(File inFile, int groupnum) {
-        week = Parsing.readExcelFile(inFile.getAbsolutePath(), (4 + groupnum * 2));
-        weekch = week.get(0);
-        weeknech = week.get(1);
-        init();
-    }
-
-
 
 
     @Override
@@ -45,27 +47,39 @@ public class MainActivity extends AppCompatActivity {
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         msiu = new File(getApplicationInfo().dataDir + "/msiu.xls");
 
-        ProgressDialog pd = new ProgressDialog(this);
+        pd = new ProgressDialog(this);
         pd.setTitle("Загрузка");
         pd.setMessage("Загружаем данные");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setIndeterminate(true);
         FirstInit firstInit = new FirstInit();
 
-        msiu.delete(); //TEMP
-
-
-        if (!msiu.exists()) {
-            firstInit.showDialog(msiu.getAbsolutePath(), this, pd, msiu);
-        } else {
-            try {
-                scrollView.addView(output(weekch));
-            } catch (Exception e) {
-                msiu.delete();
-                firstInit.showDialog(msiu.getAbsolutePath(), this, pd, msiu);
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case EXIT_CODE:
+                        System.exit(0);
+                        break;
+                    case DOWNLOAD_CODE:
+                        new Downloading(MainActivity.this, pd, msiu).execute();
+                        break;
+                    case DOWNLOADED_FILE:
+                        FirstInit.showCourseDialog(Parsing.readCourses(msiu.getAbsolutePath()));
+                        break;
+                    case SELECTED:
+                        init();
+                        break;
+                }
             }
-        }
+        };
+
+
+            firstInit.showDialog(msiu.getAbsolutePath(), this, pd, msiu);
+
     }
+
 
     private View output(ArrayList<ArrayList> week) {
         LayoutInflater inflater = this.getLayoutInflater();
@@ -121,10 +135,13 @@ public class MainActivity extends AppCompatActivity {
             scrollView.removeAllViews();
             scrollView.addView(output(weeknech));
         }
+        if (id == R.id.change) {
+            scrollView.removeAllViews();
+            handler.sendEmptyMessage(DOWNLOADED_FILE);
+        }
 
         return super.onOptionsItemSelected(item);
     }
-
 
 
 }
