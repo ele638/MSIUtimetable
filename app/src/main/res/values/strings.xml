@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MSIU timetable</string>
+    <string name="action_settings">Settings</string>
+    <string name="time">time</string>
+    <string name="subject">Subject</string>
+    <string name="teacher">Teacher</string>
+    <string name="place">place</string>
+    <string name="type">type</string>
+    <string name="dayweek">Dayweek</string>
+    <string name="weekch">Четная неделя</string>
+    <string name="weeknech">Нечетная неделя</string>
+
+</resources>
