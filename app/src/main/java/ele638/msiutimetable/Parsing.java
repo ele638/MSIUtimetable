@@ -77,7 +77,7 @@ public class Parsing {
         return out;
     }
 
-    public static ArrayList<ArrayList> readExcelFile(String filename, int group) {
+    public static ArrayList<ArrayList> readExcelFile(String filename,int course, int group) {
         ArrayList<ArrayList> out = new ArrayList<ArrayList>();
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             Log.w("FileUtils", "Storage not available or read only");
@@ -93,7 +93,7 @@ public class Parsing {
             Workbook myWorkBook = new HSSFWorkbook(myFileSystem);
 
             // Get the first sheet from workbook
-            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(0);
+            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(course);
 
             /** We now need something to iterate through the cells.**/
             out = Subject.process(mySheet, group);

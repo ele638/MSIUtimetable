@@ -52,13 +52,13 @@ public class FirstInit {
 
     }
 
-    public static void showGroupDialog(ArrayList<String> list){
+    public static void showGroupDialog(ArrayList<String> list, final int course){
         CharSequence[] items = list.toArray(new CharSequence[list.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         builder.setTitle("Выберите группу");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                MainActivity.week = Parsing.readExcelFile(mfile.getAbsolutePath(), (2 + item * 2));
+                MainActivity.week = Parsing.readExcelFile(mfile.getAbsolutePath(), (2 + item * 2), course);
                 MainActivity.weekch = MainActivity.week.get(0);
                 MainActivity.weeknech = MainActivity.week.get(1);
                 MainActivity.handler.sendEmptyMessage(MainActivity.SELECTED);
@@ -74,7 +74,7 @@ public class FirstInit {
         builder.setTitle("Выберите курс");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                showGroupDialog(Parsing.readGroups(mfile.getAbsolutePath(), item));
+                showGroupDialog(Parsing.readGroups(mfile.getAbsolutePath(), item), item);
             }
         });
         AlertDialog alert = builder.create();
