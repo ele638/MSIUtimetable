@@ -10,5 +10,8 @@
     <string name="weekch">Четная неделя</string>
     <string name="weeknech">Нечетная неделя</string>
     <string name="change">Сменить курс и группу</string>
+    <string name="title_activity_about">About</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>

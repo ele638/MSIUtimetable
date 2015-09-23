@@ -18,15 +18,15 @@ import java.util.ArrayList;
  */
 public class Parsing {
 
-    public static ArrayList<String> readCourses(String filename){
-        ArrayList<String> out = new ArrayList<String>();
+    public static ArrayList<String> readCourses(File filename) {
+        ArrayList<String> out = new ArrayList<>();
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             Log.w("FileUtils", "Storage not available or read only");
             return out;
         }
         try {
             // Creating Input Stream
-            File file = new File(filename);
+            File file = new File(filename.getAbsolutePath());
             FileInputStream myInput = new FileInputStream(file.getAbsolutePath());
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
 
@@ -45,15 +45,15 @@ public class Parsing {
         return out;
     }
 
-    public static ArrayList<String> readGroups(String filename, int inCourse) {
-        ArrayList<String> out = new ArrayList<String>();
+    public static ArrayList<String> readGroups(File filename, int inCourse) {
+        ArrayList<String> out = new ArrayList<>();
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             Log.w("FileUtils", "Storage not available or read only");
             return out;
         }
         try {
             // Creating Input Stream
-            File file = new File(filename);
+            File file = new File(filename.getAbsolutePath());
             FileInputStream myInput = new FileInputStream(file.getAbsolutePath());
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
 
@@ -77,15 +77,15 @@ public class Parsing {
         return out;
     }
 
-    public static ArrayList<ArrayList> readExcelFile(String filename, int group) {
-        ArrayList<ArrayList> out = new ArrayList<ArrayList>();
+    public static ArrayList<ArrayList> readExcelFile(File filename, int group, int course) {
+        ArrayList<ArrayList> out = new ArrayList<>();
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             Log.w("FileUtils", "Storage not available or read only");
             return out;
         }
         try {
             // Creating Input Stream
-            File file = new File(filename);
+            File file = new File(filename.getAbsolutePath());
             FileInputStream myInput = new FileInputStream(file.getAbsolutePath());
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
 
@@ -93,7 +93,7 @@ public class Parsing {
             Workbook myWorkBook = new HSSFWorkbook(myFileSystem);
 
             // Get the first sheet from workbook
-            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(0);
+            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(course);
 
             /** We now need something to iterate through the cells.**/
             out = Subject.process(mySheet, group);
@@ -107,17 +107,11 @@ public class Parsing {
 
     public static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState);
     }
 
     public static boolean isExternalStorageAvailable() {
         String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(extStorageState);
     }
 }

@@ -7,4 +7,9 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/change" android:title="@string/change"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item
+        android:id="@+id/about"
+        android:title="О программе"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
 </menu>

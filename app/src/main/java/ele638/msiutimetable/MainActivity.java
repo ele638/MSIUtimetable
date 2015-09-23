@@ -1,6 +1,9 @@
 package ele638.msiutimetable;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -18,12 +22,17 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    SharedPreferences sPref;
+    SharedPreferences.Editor ed;
+    static int SAVED_COURSE;
+    static int SAVED_GROUP;
+    static int SAVED_WEEK;
+    static boolean INITIALIZED;
+
 
     private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
     ScrollView scrollView;
     static ArrayList<ArrayList> week;
-    static ArrayList<ArrayList> weekch;
-    static ArrayList<ArrayList> weeknech;
     File msiu;
     ProgressDialog pd;
 
@@ -34,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
     static final int SELECTED = 3;
 
     public void init() {
-        FirstInit.showCourseDialog(Parsing.readCourses(msiu.getAbsolutePath()));
-        scrollView.addView(output(weekch));
+        week = Parsing.readExcelFile(msiu, SAVED_GROUP, SAVED_COURSE);
+        scrollView.addView(output(week.get(SAVED_WEEK)));
     }
 
 
@@ -43,17 +52,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(getResources().getColor(R.color.primary));
+        }
+
         //ДАННЫЕ
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         msiu = new File(getApplicationInfo().dataDir + "/msiu.xls");
-
+        sPref = getSharedPreferences("CONFIG", MODE_PRIVATE);
+        ed = sPref.edit();
         pd = new ProgressDialog(this);
         pd.setTitle("Загрузка");
         pd.setMessage("Загружаем данные");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setIndeterminate(true);
-        FirstInit firstInit = new FirstInit();
-
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -66,17 +79,30 @@ public class MainActivity extends AppCompatActivity {
                         new Downloading(MainActivity.this, pd, msiu).execute();
                         break;
                     case DOWNLOADED_FILE:
-                        FirstInit.showCourseDialog(Parsing.readCourses(msiu.getAbsolutePath()));
+                        FirstInit.showCourseDialog(msiu, MainActivity.this);
                         break;
                     case SELECTED:
+                        INITIALIZED = true;
+                        ed.putInt("Course", SAVED_COURSE);
+                        ed.putInt("Group", SAVED_GROUP);
+                        ed.putBoolean("init", INITIALIZED);
+                        ed.putInt("Week", SAVED_WEEK);
+                        ed.commit();
                         init();
                         break;
                 }
             }
         };
+        INITIALIZED = sPref.getBoolean("init", false);
 
-
-            firstInit.showDialog(msiu.getAbsolutePath(), this, pd, msiu);
+        if (!INITIALIZED) {
+            FirstInit.showDialog(MainActivity.this);
+        } else {
+            SAVED_COURSE = sPref.getInt("Course", 0);
+            SAVED_GROUP = sPref.getInt("Group", 0);
+            SAVED_WEEK = sPref.getInt("Week", 0);
+            init();
+        }
 
     }
 
@@ -129,15 +155,31 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.weekch) {
             scrollView.removeAllViews();
-            scrollView.addView(output(weekch));
+            SAVED_WEEK = 0;
+            ed.putInt("Week", SAVED_WEEK);
+            ed.commit();
+            scrollView.addView(output(week.get(SAVED_WEEK)));
         }
         if (id == R.id.weeknech) {
             scrollView.removeAllViews();
-            scrollView.addView(output(weeknech));
+            SAVED_WEEK = 1;
+            ed.putInt("Week", SAVED_WEEK);
+            ed.commit();
+            scrollView.addView(output(week.get(SAVED_WEEK)));
         }
         if (id == R.id.change) {
             scrollView.removeAllViews();
-            handler.sendEmptyMessage(DOWNLOADED_FILE);
+            SAVED_GROUP = 0;
+            SAVED_COURSE = 0;
+            INITIALIZED = false;
+            FirstInit.showCourseDialog(msiu, this);
+        }
+        if (id == R.id.about) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            LayoutInflater inflater = getLayoutInflater();
+            builder.setTitle("О программе");
+            builder.setView(R.layout.about_layout);
+            builder.create().show();
         }
 
         return super.onOptionsItemSelected(item);

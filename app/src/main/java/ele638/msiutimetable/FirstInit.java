@@ -1,7 +1,6 @@
 package ele638.msiutimetable;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
@@ -12,23 +11,9 @@ import java.util.ArrayList;
  * Created by ele638 on 23.09.15.
  */
 public class FirstInit {
+    static protected AlertDialog alert;
 
-
-
-
-    protected Boolean flag;
-    protected String path;
-    protected AlertDialog alert;
-    static protected  Context ctx;
-    protected ProgressDialog pd;
-    static protected  File mfile;
-
-
-    public void showDialog(String inPath, Context context, ProgressDialog inPD, File infile) {
-        ctx = context;
-        path = inPath;
-        pd = inPD;
-        mfile = infile;
+    public static void showDialog(Context context) {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setTitle("Нет файла с расписанием");
         alertBuilder.setMessage("Скачать файл с расписанием? (Потребуется соединение с интернетом, будет скачано около 400 Кб");
@@ -48,19 +33,16 @@ public class FirstInit {
         });
         alert = alertBuilder.create();
         alert.show();
-
-
     }
 
-    public static void showGroupDialog(ArrayList<String> list){
-        CharSequence[] items = list.toArray(new CharSequence[list.size()]);
-        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+    public static void showGroupDialog(File mfile, Context context, int course) {
+        ArrayList<String> courses = Parsing.readGroups(mfile, course);
+        CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Выберите группу");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                MainActivity.week = Parsing.readExcelFile(mfile.getAbsolutePath(), (2 + item * 2));
-                MainActivity.weekch = MainActivity.week.get(0);
-                MainActivity.weeknech = MainActivity.week.get(1);
+                MainActivity.SAVED_GROUP = 2 + item * 2;
                 MainActivity.handler.sendEmptyMessage(MainActivity.SELECTED);
             }
         });
@@ -68,13 +50,15 @@ public class FirstInit {
         alert.show();
     }
 
-    public static void showCourseDialog(ArrayList<String> list){
-        CharSequence[] items = list.toArray(new CharSequence[list.size()]);
-        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+    public static void showCourseDialog(final File mfile, final Context context) {
+        ArrayList<String> courses = Parsing.readCourses(mfile);
+        CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Выберите курс");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                showGroupDialog(Parsing.readGroups(mfile.getAbsolutePath(), item));
+                MainActivity.SAVED_COURSE = item;
+                showGroupDialog(mfile, context, item);
             }
         });
         AlertDialog alert = builder.create();
