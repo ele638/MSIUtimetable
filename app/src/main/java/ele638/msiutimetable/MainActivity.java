@@ -28,9 +28,11 @@ public class MainActivity extends AppCompatActivity {
     static int SAVED_GROUP;
     static int SAVED_WEEK;
     static boolean INITIALIZED;
+    static String title;
 
 
     private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
+    private final String[] weeks = {"Четная неделя", "Нечетная неделя"};
     ScrollView scrollView;
     static ArrayList<ArrayList> week;
     File msiu;
@@ -87,7 +89,10 @@ public class MainActivity extends AppCompatActivity {
                         ed.putInt("Group", SAVED_GROUP);
                         ed.putBoolean("init", INITIALIZED);
                         ed.putInt("Week", SAVED_WEEK);
+                        ed.putString("titleName", title);
+                        ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
                         ed.commit();
+                        setTitle(title + " - " + weeks[SAVED_WEEK]);
                         init();
                         break;
                 }
@@ -101,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
             SAVED_COURSE = sPref.getInt("Course", 0);
             SAVED_GROUP = sPref.getInt("Group", 0);
             SAVED_WEEK = sPref.getInt("Week", 0);
+            title = sPref.getString("titleName", "MSIU");
+            setTitle(sPref.getString("title", "MSIU timetable"));
             init();
         }
 
@@ -157,14 +164,20 @@ public class MainActivity extends AppCompatActivity {
             scrollView.removeAllViews();
             SAVED_WEEK = 0;
             ed.putInt("Week", SAVED_WEEK);
+            ed.putString("titleName", title);
+            ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
+            setTitle(title + " - " + weeks[SAVED_WEEK]);
             scrollView.addView(output(week.get(SAVED_WEEK)));
         }
         if (id == R.id.weeknech) {
             scrollView.removeAllViews();
             SAVED_WEEK = 1;
             ed.putInt("Week", SAVED_WEEK);
+            ed.putString("titleName", title);
+            ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
+            setTitle(title + " - " + weeks[SAVED_WEEK]);
             scrollView.addView(output(week.get(SAVED_WEEK)));
         }
         if (id == R.id.change) {

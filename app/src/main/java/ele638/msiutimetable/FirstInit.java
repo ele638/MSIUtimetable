@@ -37,12 +37,13 @@ public class FirstInit {
 
     public static void showGroupDialog(File mfile, Context context, int course) {
         ArrayList<String> courses = Parsing.readGroups(mfile, course);
-        CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
+        final CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Выберите группу");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
                 MainActivity.SAVED_GROUP = 2 + item * 2;
+                MainActivity.title = items[item].toString();
                 MainActivity.handler.sendEmptyMessage(MainActivity.SELECTED);
             }
         });
