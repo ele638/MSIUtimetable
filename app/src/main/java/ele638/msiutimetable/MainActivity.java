@@ -2,16 +2,20 @@ package ele638.msiutimetable;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -24,15 +28,18 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sPref;
     SharedPreferences.Editor ed;
+    static int SAVED_TIME;
     static int SAVED_COURSE;
     static int SAVED_GROUP;
     static int SAVED_WEEK;
+    static int TEXT_SIZE = 14;
     static boolean INITIALIZED;
     static String title;
 
 
     private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
     private final String[] weeks = {"Четная неделя", "Нечетная неделя"};
+    static String[] timeList;
     ScrollView scrollView;
     static ArrayList<ArrayList> week;
     File msiu;
@@ -45,10 +52,34 @@ public class MainActivity extends AppCompatActivity {
     static final int SELECTED = 3;
 
     public void init() {
-        week = Parsing.readExcelFile(msiu, SAVED_GROUP, SAVED_COURSE);
-        scrollView.addView(output(week.get(SAVED_WEEK)));
+        scrollView.removeAllViews();
+        Parsing.openFile(msiu);
+        week = Parsing.readExcelFile();
+        scrollView.addView(output(week.get(SAVED_WEEK), TEXT_SIZE));
+        CustomFont.setCustomFont(this, scrollView);
     }
 
+    public void saveParam() {
+        INITIALIZED = true;
+        ed.putInt("Time", SAVED_TIME);
+        ed.putInt("Course", SAVED_COURSE);
+        ed.putInt("Group", SAVED_GROUP);
+        ed.putInt("Week", SAVED_WEEK);
+        ed.putInt("TextSize", TEXT_SIZE);
+        ed.putBoolean("init", INITIALIZED);
+        ed.putString("titleName", title);
+        ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
+        ed.commit();
+    }
+
+    public void paramLoad() {
+        SAVED_TIME = sPref.getInt("Time", 0);
+        SAVED_COURSE = sPref.getInt("Course", 0);
+        SAVED_GROUP = sPref.getInt("Group", 0);
+        SAVED_WEEK = sPref.getInt("Week", 0);
+        TEXT_SIZE = sPref.getInt("TextSize", 14);
+        title = sPref.getString("titleName", "MSIU");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
         pd.setMessage("Загружаем данные");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setIndeterminate(true);
+
+
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -81,40 +114,36 @@ public class MainActivity extends AppCompatActivity {
                         new Downloading(MainActivity.this, pd, msiu).execute();
                         break;
                     case DOWNLOADED_FILE:
-                        FirstInit.showCourseDialog(msiu, MainActivity.this);
+                        Parsing.openFile(msiu);
+                        FirstInit.showTimeDialog(MainActivity.this);
                         break;
                     case SELECTED:
-                        INITIALIZED = true;
-                        ed.putInt("Course", SAVED_COURSE);
-                        ed.putInt("Group", SAVED_GROUP);
-                        ed.putBoolean("init", INITIALIZED);
-                        ed.putInt("Week", SAVED_WEEK);
-                        ed.putString("titleName", title);
-                        ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
-                        ed.commit();
+                        saveParam();
                         setTitle(title + " - " + weeks[SAVED_WEEK]);
                         init();
                         break;
                 }
             }
         };
+        paramLoad();
         INITIALIZED = sPref.getBoolean("init", false);
-
         if (!INITIALIZED) {
             FirstInit.showDialog(MainActivity.this);
         } else {
-            SAVED_COURSE = sPref.getInt("Course", 0);
-            SAVED_GROUP = sPref.getInt("Group", 0);
-            SAVED_WEEK = sPref.getInt("Week", 0);
-            title = sPref.getString("titleName", "MSIU");
+            paramLoad();
             setTitle(sPref.getString("title", "MSIU timetable"));
-            init();
+            try {
+                init();
+            } catch (Exception e) {
+                FirstInit.showDialog(MainActivity.this);
+            }
+
         }
 
     }
 
 
-    private View output(ArrayList<ArrayList> week) {
+    private View output(ArrayList<ArrayList> week, int textSize) {
         LayoutInflater inflater = this.getLayoutInflater();
         View mainview = inflater.inflate(R.layout.mainlayout, null, false);
         LinearLayout mainlayout = (LinearLayout) mainview.findViewById(R.id.mainlayout);
@@ -122,7 +151,11 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Subject> subjects = week.get(i);
             if (subjects.size() != 0) {
                 View view = inflater.inflate(R.layout.day_layout, null, false);
-                LinearLayout dayview = (LinearLayout) view.findViewById(R.id.dayview);
+                CardView cardView = (CardView) view.findViewById(R.id.card);
+                LinearLayout.LayoutParams lparams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                LinearLayout dayview = new LinearLayout(MainActivity.this);
+                dayview.setLayoutParams(lparams);
+                dayview.setOrientation(LinearLayout.VERTICAL);
                 View header = inflater.inflate(R.layout.header, dayview, false);
                 ((TextView) header.findViewById(R.id.day_text)).setText(daynames[i]);
                 dayview.addView(header);
@@ -131,14 +164,16 @@ public class MainActivity extends AppCompatActivity {
                     View element = inflater.inflate(R.layout.element_layout, dayview, false);
                     ((TextView) element.findViewById(R.id.time)).setText(s.time);
                     ((TextView) element.findViewById(R.id.subject)).setText(s.subject);
+                    ((TextView) element.findViewById(R.id.subject)).setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
                     ((TextView) element.findViewById(R.id.teacher)).setText(s.teacher);
                     ((TextView) element.findViewById(R.id.place)).setText(s.place);
+                    ((TextView) element.findViewById(R.id.place)).setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
                     ((TextView) element.findViewById(R.id.type)).setText(s.type);
+                    ((TextView) element.findViewById(R.id.type)).setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
                     dayview.addView(element);
                 }
-                View separator = inflater.inflate(R.layout.separator, dayview, false);
-                dayview.addView(separator);
-                mainlayout.addView(dayview);
+                cardView.addView(dayview);
+                mainlayout.addView(cardView);
             }
         }
         return mainlayout;
@@ -168,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
             ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
             setTitle(title + " - " + weeks[SAVED_WEEK]);
-            scrollView.addView(output(week.get(SAVED_WEEK)));
+            scrollView.addView(output(week.get(SAVED_WEEK), TEXT_SIZE));
         }
         if (id == R.id.weeknech) {
             scrollView.removeAllViews();
@@ -178,21 +213,59 @@ public class MainActivity extends AppCompatActivity {
             ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
             setTitle(title + " - " + weeks[SAVED_WEEK]);
-            scrollView.addView(output(week.get(SAVED_WEEK)));
+            scrollView.addView(output(week.get(SAVED_WEEK), TEXT_SIZE));
         }
         if (id == R.id.change) {
             scrollView.removeAllViews();
             SAVED_GROUP = 0;
             SAVED_COURSE = 0;
             INITIALIZED = false;
-            FirstInit.showCourseDialog(msiu, this);
+            FirstInit.showTimeDialog(this);
         }
         if (id == R.id.about) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             LayoutInflater inflater = getLayoutInflater();
             builder.setTitle("О программе");
-            builder.setView(R.layout.about_layout);
+            View view = View.inflate(this, R.layout.about_layout, null);
+            builder.setView(view);
             builder.create().show();
+        }
+        if (id == R.id.textSize) {
+            CharSequence[] items = {"Маленький", "Средний", "Большой"};
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Выберите размер шрифта");
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    switch (item) {
+                        case 0:
+                            TEXT_SIZE = 14;
+                            ed.putInt("TextSize", TEXT_SIZE);
+                            ed.commit();
+                            init();
+                            break;
+                        case 1:
+                            TEXT_SIZE = 18;
+                            ed.putInt("TextSize", TEXT_SIZE);
+                            ed.commit();
+                            init();
+                            break;
+                        case 2:
+                            TEXT_SIZE = 22;
+                            ed.putInt("TextSize", TEXT_SIZE);
+                            ed.commit();
+                            init();
+                            break;
+                        default:
+                            TEXT_SIZE = 14;
+                            ed.putInt("TextSize", TEXT_SIZE);
+                            ed.commit();
+                            init();
+                            break;
+                    }
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.show();
         }
 
         return super.onOptionsItemSelected(item);

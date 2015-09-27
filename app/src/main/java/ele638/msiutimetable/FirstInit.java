@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 public class FirstInit {
     static protected AlertDialog alert;
 
+    //Алерт отсутствия файла
     public static void showDialog(Context context) {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setTitle("Нет файла с расписанием");
@@ -35,8 +35,39 @@ public class FirstInit {
         alert.show();
     }
 
-    public static void showGroupDialog(File mfile, Context context, int course) {
-        ArrayList<String> courses = Parsing.readGroups(mfile, course);
+    //Алерт выбора типа обучения (вечернее, дневное)
+    public static void showTimeDialog(final Context context) {
+        CharSequence[] items = {"Дневная", "Вечерняя",};
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Выберите форму обучения");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                MainActivity.SAVED_TIME = item;
+                showCourseDialog(context, item);
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public static void showCourseDialog(final Context context, int item) {
+        ArrayList<String> courses = Parsing.readCourses().get(item);
+        CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Выберите курс");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                MainActivity.SAVED_COURSE = item * 2 + MainActivity.SAVED_TIME;
+                showGroupDialog(context);
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+    public static void showGroupDialog(Context context) {
+        ArrayList<String> courses = Parsing.readGroups(MainActivity.SAVED_COURSE);
         final CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Выберите группу");
@@ -50,21 +81,4 @@ public class FirstInit {
         AlertDialog alert = builder.create();
         alert.show();
     }
-
-    public static void showCourseDialog(final File mfile, final Context context) {
-        ArrayList<String> courses = Parsing.readCourses(mfile);
-        CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Выберите курс");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                MainActivity.SAVED_COURSE = item;
-                showGroupDialog(mfile, context, item);
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-
 }

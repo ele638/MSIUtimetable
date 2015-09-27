@@ -1,15 +1,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <item android:id="@+id/weekch" android:title="@string/weekch"
-        android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/weeknech" android:title="@string/weeknech"
-        android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/change" android:title="@string/change"
-        android:orderInCategory="100" app:showAsAction="never" />
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/weekch"
+        android:orderInCategory="1"
+        android:title="@string/weekch"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/weeknech"
+        android:orderInCategory="2"
+        android:title="@string/weeknech"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/change"
+        android:orderInCategory="3"
+        android:title="@string/change"
+        app:showAsAction="never" />
     <item
         android:id="@+id/about"
-        android:title="О программе"
         android:orderInCategory="100"
+        android:title="О программе"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/textSize"
+        android:orderInCategory="4"
+        android:title="Размер шрифта" />
 </menu>
