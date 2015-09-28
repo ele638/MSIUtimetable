@@ -7,47 +7,66 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+<<<<<<< HEAD
     SharedPreferences sPref;
     SharedPreferences.Editor ed;
+=======
+    static final int EXIT_CODE = 0;
+    static final int DOWNLOAD_CODE = 1;
+    static final int DOWNLOADED_FILE = 2;
+    static final int SELECTED = 3;
+    static int SAVED_TIME;
+>>>>>>> origin/master
     static int SAVED_COURSE;
     static int SAVED_GROUP;
     static int SAVED_WEEK;
     static boolean INITIALIZED;
     static String title;
-
-
+    static ArrayList<Week> week;
+    static Handler handler;
     private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
     private final String[] weeks = {"Четная неделя", "Нечетная неделя"};
+<<<<<<< HEAD
     ScrollView scrollView;
     static ArrayList<ArrayList> week;
+=======
+    SharedPreferences sPref;
+    SharedPreferences.Editor ed;
+    ViewPager viewPager;
+    PagerAdapter pagerAdapter;
+>>>>>>> origin/master
     File msiu;
     ProgressDialog pd;
 
-    static Handler handler;
-    static final int EXIT_CODE = 0;
-    static final int DOWNLOAD_CODE = 1;
-    static final int DOWNLOADED_FILE = 2;
-    static final int SELECTED = 3;
-
     public void init() {
+<<<<<<< HEAD
         week = Parsing.readExcelFile(msiu, SAVED_GROUP, SAVED_COURSE);
         scrollView.addView(output(week.get(SAVED_WEEK)));
+=======
+        Parsing.openFile(msiu);
+        week = Parsing.readExcelFile();
+        viewPager.setAdapter(pagerAdapter);
+        CustomFont.setCustomFont(this, viewPager);
+>>>>>>> origin/master
     }
+
 
 
     @Override
@@ -60,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //ДАННЫЕ
-        scrollView = (ScrollView) findViewById(R.id.scrollView);
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        pagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
         msiu = new File(getApplicationInfo().dataDir + "/msiu.xls");
         sPref = getSharedPreferences("CONFIG", MODE_PRIVATE);
         ed = sPref.edit();
@@ -98,6 +118,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+<<<<<<< HEAD
+=======
+
+
+        paramLoad();
+>>>>>>> origin/master
         INITIALIZED = sPref.getBoolean("init", false);
 
         if (!INITIALIZED) {
@@ -114,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+<<<<<<< HEAD
     private View output(ArrayList<ArrayList> week) {
         LayoutInflater inflater = this.getLayoutInflater();
         View mainview = inflater.inflate(R.layout.mainlayout, null, false);
@@ -144,12 +171,15 @@ public class MainActivity extends AppCompatActivity {
         return mainlayout;
     }
 
+=======
+>>>>>>> origin/master
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
 
 
     @Override
@@ -161,27 +191,32 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.weekch) {
-            scrollView.removeAllViews();
             SAVED_WEEK = 0;
             ed.putInt("Week", SAVED_WEEK);
             ed.putString("titleName", title);
             ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
             setTitle(title + " - " + weeks[SAVED_WEEK]);
+<<<<<<< HEAD
             scrollView.addView(output(week.get(SAVED_WEEK)));
+=======
+            init();
+>>>>>>> origin/master
         }
         if (id == R.id.weeknech) {
-            scrollView.removeAllViews();
             SAVED_WEEK = 1;
             ed.putInt("Week", SAVED_WEEK);
             ed.putString("titleName", title);
             ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
             ed.commit();
             setTitle(title + " - " + weeks[SAVED_WEEK]);
+<<<<<<< HEAD
             scrollView.addView(output(week.get(SAVED_WEEK)));
+=======
+            init();
+>>>>>>> origin/master
         }
         if (id == R.id.change) {
-            scrollView.removeAllViews();
             SAVED_GROUP = 0;
             SAVED_COURSE = 0;
             INITIALIZED = false;
@@ -199,5 +234,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+
+        public MyFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return WeekFragment.newInstance(position);
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Четная неделя";
+                case 1:
+                    return "Нечетная неделя";
+                default:
+                    return "Ну что за нахуй";
+            }
+        }
+    }
 }
 

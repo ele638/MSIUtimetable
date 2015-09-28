@@ -1,5 +1,6 @@
 package ele638.msiutimetable;
 
+<<<<<<< HEAD
 import android.util.Log;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -10,6 +11,14 @@ import java.util.ArrayList;
 /**
  * Created by ele638 on 15.09.15.
  */
+=======
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+>>>>>>> origin/master
 public class Subject {
     private final String times[] = {"09:00\n10:30", "10:40\n12:10", "12:20\n13:50", "14:30\n16:00", "16:10\n17:40", "17:50\n19:20"};
     public final String subject;
@@ -27,6 +36,7 @@ public class Subject {
         time = times[count];
     }
 
+<<<<<<< HEAD
     public static ArrayList<ArrayList> process(HSSFSheet mySheet, int groupnum) {
         int rowPos = 1;
         int cellPos = groupnum;
@@ -101,5 +111,22 @@ public class Subject {
         teacher = getVal(myRow2, cell);
         type = getVal(myRow2, cell+1);
         return new Subject(j, subject, teacher, type, place);
+=======
+    public View setView(LayoutInflater inflater, ViewGroup container) {
+        View element = inflater.inflate(R.layout.element_layout, container, false);
+        ((TextView) element.findViewById(R.id.time)).setText(this.time);
+        ((TextView) element.findViewById(R.id.subject)).setText(this.subject);
+        ((TextView) element.findViewById(R.id.subject)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        ((TextView) element.findViewById(R.id.teacher)).setText(this.teacher);
+        ((TextView) element.findViewById(R.id.place)).setText(this.place);
+        ((TextView) element.findViewById(R.id.place)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        ((TextView) element.findViewById(R.id.type)).setText(this.type);
+        ((TextView) element.findViewById(R.id.type)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        return element;
+    }
+
+    public boolean isEmpty() {
+        return subject == "";
+>>>>>>> origin/master
     }
 }
