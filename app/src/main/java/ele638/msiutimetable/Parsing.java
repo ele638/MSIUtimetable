@@ -64,9 +64,9 @@ public class Parsing {
         return out;
     }
 
-    public static ArrayList<ArrayList> readExcelFile() {
+    public static ArrayList<Week> readExcelFile() {
         HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(MainActivity.SAVED_COURSE);
-        return processMSIU(mySheet, MainActivity.SAVED_TIME, MainActivity.SAVED_GROUP, MainActivity.SAVED_TIME);
+        return processMSIU(mySheet, MainActivity.SAVED_TIME, MainActivity.SAVED_GROUP);
     }
 
     public static boolean isExternalStorageReadOnly() {
@@ -80,18 +80,18 @@ public class Parsing {
     }
 
 
-    public static ArrayList<ArrayList> processMSIU(HSSFSheet mySheet, int time, int groupnum, int intime) {
+    public static ArrayList<Week> processMSIU(HSSFSheet mySheet, int time, int groupnum) {
         int rowPos = 1;
-        ArrayList<ArrayList> weekdaych = new ArrayList<>();
-        ArrayList<ArrayList> weekdaynech = new ArrayList<>();
-        ArrayList<ArrayList> week = new ArrayList<>();
+        Week weekdaych = new Week(0);
+        Week weekdaynech = new Week(1);
+        ArrayList<Week> week = new ArrayList<>();
         //Парсер для дневной формы обучения
         if (time == 0) {
             //Идем по всей неделе
             for (int i = 0; i < 6; i++) {
                 //Идем по дням
-                ArrayList<Subject> daych = new ArrayList<>();
-                ArrayList<Subject> daynech = new ArrayList<>();
+                Day daych = new Day(i);
+                Day daynech = new Day(i);
                 for (int j = 0; j < 6; j++) {
                     //Идем по часам, сначала первые две строчки - четные дни
                     for (int k = 0; k < 2; k++) {
@@ -111,10 +111,8 @@ public class Parsing {
                         rowPos += 2;
                     }
                 }
-                weekdaych.add(weekdaych.size(), daych);
-                Log.d("NORM", "Записан " + weekdaych.size() + "-й четный день");
-                weekdaynech.add(weekdaynech.size(), daynech);
-                Log.d("NORM", "Записан " + weekdaynech.size() + "-й нечетный день");
+                weekdaych.add(daych);
+                weekdaynech.add(daynech);
             }
             week.add(weekdaych);
             week.add(weekdaynech);
@@ -124,8 +122,8 @@ public class Parsing {
         {
             //Идем по будням
             for (int i = 0; i < 5; i++) {
-                ArrayList<Subject> daych = new ArrayList<>();
-                ArrayList<Subject> daynech = new ArrayList<>();
+                Day daych = new Day(i);
+                Day daynech = new Day(i);
                 //Будни вечерки
                 for (int j = 0; j < 2; j++) {
                     //Идем по часам, сначала первые две строчки - четные дни
@@ -147,13 +145,11 @@ public class Parsing {
                     }
                 }
                 weekdaych.add(daych);
-                Log.d("NORM", "Записан " + weekdaych.size() + "-й четный день");
                 weekdaynech.add(daynech);
-                Log.d("NORM", "Записан " + weekdaynech.size() + "-й нечетный день");
             }
             //Суббота вечерки
-            ArrayList<Subject> daych = new ArrayList<>();
-            ArrayList<Subject> daynech = new ArrayList<>();
+            Day daych = new Day(5);
+            Day daynech = new Day(5);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 2; k++) {
                     Boolean flag = (exept(mySheet.getRow(rowPos), groupnum) == 1);
@@ -172,10 +168,8 @@ public class Parsing {
                     rowPos += 2;
                 }
             }
-            weekdaych.add(weekdaych.size(), daych);
-            Log.d("NORM", "Записан " + weekdaych.size() + "-й четный день");
-            weekdaynech.add(weekdaynech.size(), daynech);
-            Log.d("NORM", "Записан " + weekdaynech.size() + "-й нечетный день");
+            weekdaych.add(daych);
+            weekdaynech.add(daynech);
             week.add(weekdaych);
             week.add(weekdaynech);
             return week;

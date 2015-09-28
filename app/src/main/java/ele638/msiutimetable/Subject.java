@@ -1,8 +1,11 @@
 package ele638.msiutimetable;
 
-/**
- * Created by ele638 on 15.09.15.
- */
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
 public class Subject {
     public static String times[] = {
             "09.00\n10.30",
@@ -30,5 +33,20 @@ public class Subject {
         time = times[inTime];
     }
 
+    public View setView(LayoutInflater inflater, ViewGroup container) {
+        View element = inflater.inflate(R.layout.element_layout, container, false);
+        ((TextView) element.findViewById(R.id.time)).setText(this.time);
+        ((TextView) element.findViewById(R.id.subject)).setText(this.subject);
+        ((TextView) element.findViewById(R.id.subject)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        ((TextView) element.findViewById(R.id.teacher)).setText(this.teacher);
+        ((TextView) element.findViewById(R.id.place)).setText(this.place);
+        ((TextView) element.findViewById(R.id.place)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        ((TextView) element.findViewById(R.id.type)).setText(this.type);
+        ((TextView) element.findViewById(R.id.type)).setTextSize(TypedValue.COMPLEX_UNIT_SP, MainActivity.TEXT_SIZE);
+        return element;
+    }
 
+    public boolean isEmpty() {
+        return subject == "";
+    }
 }
