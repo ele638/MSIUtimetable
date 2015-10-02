@@ -27,10 +27,11 @@ public class MyListAdapter implements ListAdapter {
         List<Day> out = new ArrayList<>();
         this.alldays = inalldays;
         weekends = new ArrayList<>();
-        for (int i = 0; i < alldays.size(); i++) {
-            if (alldays.get(i).isEmpty()) {
+        for (int i=0; i<alldays.size();i++){
+            if (alldays.get(i).isEmpty()){
                 weekends.add(true);
-            } else {
+            }
+            else{
                 out.add(alldays.get(i));
                 weekends.add(false);
             }
@@ -81,8 +82,8 @@ public class MyListAdapter implements ListAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater vi = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = days.get(position).setView(vi);
-        int i = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 2;
-        if (alldays.indexOf(days.get(position)) == i) {
+        int i = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 2 ;
+        if (alldays.indexOf(days.get(position))==i){
             try {
                 v = days.get(position).setCurrentView(vi);
                 Animation animation = AnimationUtils.loadAnimation(parent.getContext(), R.anim.slide_in_right);
@@ -100,9 +101,7 @@ public class MyListAdapter implements ListAdapter {
 
 
     @Override
-    public int getItemViewType(int position) {
-        return 0;
-    }
+    public int getItemViewType(int position) { return 0; }
 
     @Override
     public int getViewTypeCount() {

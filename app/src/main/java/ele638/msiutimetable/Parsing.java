@@ -17,12 +17,11 @@ import java.util.ArrayList;
  * Created by ele638 on 23.09.15.
  */
 public class Parsing {
+    private static Workbook myWorkBook;
 
-    public static ArrayList<String> readCourses(File filename) {
-        ArrayList<String> out = new ArrayList<>();
+    public static void openFile(File filename) {
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             Log.w("FileUtils", "Storage not available or read only");
-            return out;
         }
         try {
             // Creating Input Stream
@@ -31,33 +30,37 @@ public class Parsing {
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
 
             // Create a workbook using the File System
-            Workbook myWorkBook = new HSSFWorkbook(myFileSystem);
-
-            for (int i=0; i<myWorkBook.getNumberOfSheets(); i++){
-                out.add(myWorkBook.getSheetName(i));
-            }
-
+            myWorkBook = new HSSFWorkbook(myFileSystem);
         } catch (Exception e) {
             String a = e.toString();
             Log.e("WTFuck", a);
         }
+    }
 
+    public static ArrayList<ArrayList> readCourses() {
+        ArrayList<ArrayList> out = new ArrayList<>();
+        ArrayList<String> och = new ArrayList<>();
+        ArrayList<String> vech = new ArrayList<>();
+        for (int i = 0, k = 0; i < myWorkBook.getNumberOfSheets(); i++) {
+            if (k == 0) {
+                och.add(myWorkBook.getSheetName(i));
+                k = 1;
+            } else {
+                vech.add(myWorkBook.getSheetName(i).replace("(2)", " (вечер)"));
+                k = 0;
+            }
+        }
+        out.add(och);
+        out.add(vech);
         return out;
     }
 
-    public static ArrayList<String> readGroups(File filename, int inCourse) {
+    public static ArrayList<String> readGroups(int inCourse) {
         ArrayList<String> out = new ArrayList<>();
-        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
-            Log.w("FileUtils", "Storage not available or read only");
-            return out;
+        HSSFRow myRow = (HSSFRow) myWorkBook.getSheetAt(inCourse).getRow(0);
+        for (int i = 2; i < myRow.getLastCellNum(); i += 2) {
+            out.add(myRow.getCell(i).toString().replace(".0", ""));
         }
-<<<<<<< HEAD
-        try {
-            // Creating Input Stream
-            File file = new File(filename.getAbsolutePath());
-            FileInputStream myInput = new FileInputStream(file.getAbsolutePath());
-            POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
-=======
         return out;
     }
 
@@ -70,21 +73,13 @@ public class Parsing {
         String extStorageState = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState);
     }
->>>>>>> origin/master
 
-            // Create a workbook using the File System
-            Workbook myWorkBook = new HSSFWorkbook(myFileSystem);
+    public static boolean isExternalStorageAvailable() {
+        String extStorageState = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(extStorageState);
+    }
 
-            // Get the first sheet from workbook
-            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(inCourse);
 
-<<<<<<< HEAD
-            /** We now need something to iterate through the cells.**/
-            HSSFRow myRow = mySheet.getRow(0);
-            for (int i=2; i<myRow.getLastCellNum(); i+=2){
-                out.add(myRow.getCell(i).toString().replace(".0", ""));
-            }
-=======
     public static ArrayList<Week> processMSIU(HSSFSheet mySheet, int time, int groupnum) {
         int rowPos = 1;
         Week weekdaych = new Week(0);
@@ -180,51 +175,30 @@ public class Parsing {
             return week;
         }
     }
->>>>>>> origin/master
 
-        } catch (Exception e) {
-            String a = e.toString();
-            Log.e("WTFuck", a);
-        }
-
-        return out;
-    }
-
-    public static ArrayList<ArrayList> readExcelFile(File filename, int group, int course) {
-        ArrayList<ArrayList> out = new ArrayList<>();
-        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
-            Log.w("FileUtils", "Storage not available or read only");
-            return out;
-        }
+    protected static int exept(HSSFRow row1, int cell) {
+        String test;
+        //Код 1 - нет наименования предмета
         try {
-            // Creating Input Stream
-            File file = new File(filename.getAbsolutePath());
-            FileInputStream myInput = new FileInputStream(file.getAbsolutePath());
-            POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
-
-            // Create a workbook using the File System
-            Workbook myWorkBook = new HSSFWorkbook(myFileSystem);
-
-            // Get the first sheet from workbook
-            HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(course);
-
-            /** We now need something to iterate through the cells.**/
-            out = Subject.process(mySheet, group);
+            test = row1.getCell(cell).toString();
         } catch (Exception e) {
-            String a = e.toString();
-            Log.e("WTFuck", a);
+            return 1;
         }
-
-        return out;
+        return (test == "" ? 1 : 0);
     }
 
-    public static boolean isExternalStorageReadOnly() {
-        String extStorageState = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState);
+    protected static String getVal(HSSFRow myRow, int index) {
+        String test;
+        try {
+            test = myRow.getCell(index).toString();
+        } catch (Exception e) {
+            return "";
+        }
+        return test;
     }
 
-    public static boolean isExternalStorageAvailable() {
-        String extStorageState = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(extStorageState);
+    public static Subject analyze(int j, HSSFRow myRow, HSSFRow myRow2, int cell) {
+        //задаем предмет
+        return new Subject(getVal(myRow, cell), getVal(myRow2, cell), getVal(myRow2, cell + 1), getVal(myRow, cell + 1).replace(".0", ""), j);
     }
 }
