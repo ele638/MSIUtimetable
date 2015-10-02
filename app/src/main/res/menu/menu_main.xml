@@ -3,16 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
     <item
-        android:id="@+id/weekch"
-        android:orderInCategory="1"
-        android:title="@string/weekch"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/weeknech"
-        android:orderInCategory="2"
-        android:title="@string/weeknech"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/change"
         android:orderInCategory="3"
         android:title="@string/change"

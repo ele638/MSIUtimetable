@@ -1,8 +1,5 @@
 package ele638.msiutimetable;
 
-import android.view.LayoutInflater;
-import android.view.View;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,19 +24,9 @@ public class Week {
         return days.get(i);
     }
 
-    public int size() {
-        return days.size();
-    }
-
-    public List<Day> getDays() {
+    public List<Day> getAllDays() {
         return days;
     }
 
-    public List<View> getDaysView(LayoutInflater inflater) {
-        List<View> lv = new ArrayList<>();
-        for (int i = 0; i < days.size(); i++) {
-            if (!(days.get(i).isEmpty())) lv.add(days.get(i).setView(inflater, i));
-        }
-        return lv;
-    }
+
 }

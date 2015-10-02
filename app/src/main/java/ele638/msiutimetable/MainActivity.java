@@ -22,6 +22,7 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,26 +33,28 @@ public class MainActivity extends AppCompatActivity {
     static int SAVED_TIME;
     static int SAVED_COURSE;
     static int SAVED_GROUP;
-    static int SAVED_WEEK;
     static int TEXT_SIZE = 14;
     static boolean INITIALIZED;
     static String title;
     static ArrayList<Week> week;
+    static Week selected_week;
     static Handler handler;
-    private final String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
-    private final String[] weeks = {"Четная неделя", "Нечетная неделя"};
     SharedPreferences sPref;
     SharedPreferences.Editor ed;
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
     File msiu;
     ProgressDialog pd;
+    int current_week;
 
     public void init() {
         Parsing.openFile(msiu);
         week = Parsing.readExcelFile();
+        selected_week = week.get(current_week % 2);
         viewPager.setAdapter(pagerAdapter);
         CustomFont.setCustomFont(this, viewPager);
+        viewPager.setCurrentItem((current_week % 2), true);
+        
     }
 
     public void saveParam() {
@@ -59,11 +62,10 @@ public class MainActivity extends AppCompatActivity {
         ed.putInt("Time", SAVED_TIME);
         ed.putInt("Course", SAVED_COURSE);
         ed.putInt("Group", SAVED_GROUP);
-        ed.putInt("Week", SAVED_WEEK);
         ed.putInt("TextSize", TEXT_SIZE);
         ed.putBoolean("init", INITIALIZED);
         ed.putString("titleName", title);
-        ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
+        ed.putString("title", title);
         ed.commit();
     }
 
@@ -71,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         SAVED_TIME = sPref.getInt("Time", 0);
         SAVED_COURSE = sPref.getInt("Course", 0);
         SAVED_GROUP = sPref.getInt("Group", 0);
-        SAVED_WEEK = sPref.getInt("Week", 0);
         TEXT_SIZE = sPref.getInt("TextSize", 14);
         title = sPref.getString("titleName", "MSIU");
     }
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
         msiu = new File(getApplicationInfo().dataDir + "/msiu.xls");
+        current_week = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2;
         sPref = getSharedPreferences("CONFIG", MODE_PRIVATE);
         ed = sPref.edit();
         pd = new ProgressDialog(this);
@@ -114,12 +116,13 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case SELECTED:
                         saveParam();
-                        setTitle(title + " - " + weeks[SAVED_WEEK]);
+                        setTitle(title);
                         init();
                         break;
                 }
             }
         };
+
 
 
         paramLoad();
@@ -157,24 +160,6 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.weekch) {
-            SAVED_WEEK = 0;
-            ed.putInt("Week", SAVED_WEEK);
-            ed.putString("titleName", title);
-            ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
-            ed.commit();
-            setTitle(title + " - " + weeks[SAVED_WEEK]);
-            init();
-        }
-        if (id == R.id.weeknech) {
-            SAVED_WEEK = 1;
-            ed.putInt("Week", SAVED_WEEK);
-            ed.putString("titleName", title);
-            ed.putString("title", title + " - " + weeks[SAVED_WEEK]);
-            ed.commit();
-            setTitle(title + " - " + weeks[SAVED_WEEK]);
-            init();
-        }
         if (id == R.id.change) {
             SAVED_GROUP = 0;
             SAVED_COURSE = 0;
@@ -248,14 +233,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public CharSequence getPageTitle(int position) {
+            String out;
             switch (position) {
                 case 0:
-                    return "Четная неделя";
+                    out = "Четная неделя";
+                    if (current_week == 0) out += " (текущая неделя)";
+                    return out;
                 case 1:
-                    return "Нечетная неделя";
-                default:
-                    return "Ну что за нахуй";
+                    out = "Нечетная неделя";
+                    if (current_week == 1) out += " (текущая неделя)";
+                    return out;
             }
+            return null;
         }
     }
 }
