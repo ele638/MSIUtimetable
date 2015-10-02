@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.List;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,7 +42,8 @@ public class WeekFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week, null);
         ListView lv = (ListView) view.findViewById(R.id.listview);
-        MyListAdapter adapter = new MyListAdapter(MainActivity.week.get(pageNumber).getAllDays());
+        List<Day> alldays = MainActivity.week.get(pageNumber).getAllDays();
+        MyListAdapter adapter = new MyListAdapter(alldays);
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

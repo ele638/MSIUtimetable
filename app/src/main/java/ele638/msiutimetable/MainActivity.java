@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(pagerAdapter);
         CustomFont.setCustomFont(this, viewPager);
         viewPager.setCurrentItem((current_week % 2), true);
-        
+
     }
 
     public void saveParam() {

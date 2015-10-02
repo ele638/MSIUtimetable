@@ -56,7 +56,7 @@ public class Day {
         View header = inflater.inflate(R.layout.header, dayview, false);
         TextView title = (TextView) header.findViewById(R.id.day_text);
         title.setText(dayName);
-        String current_time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + ":" + Calendar.getInstance().get(Calendar.MINUTE);
+        String current_time = String.format("%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) + ":" + String.format("%02d", Calendar.getInstance().get(Calendar.MINUTE));
         layout.addView(header, 0);
         for (int i = 0; i < subjects.size(); i++) {
             if (subjects.get(i).isCurrent(current_time)) {

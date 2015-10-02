@@ -28,5 +28,12 @@ public class Week {
         return days;
     }
 
+    public List<Day> getDays() {
+        List<Day> out = new ArrayList<>();
+        for (int i = 0; i < days.size(); i++) {
+            if (!days.get(i).isEmpty()) out.add(days.get(i));
+        }
+        return out;
+    }
 
 }

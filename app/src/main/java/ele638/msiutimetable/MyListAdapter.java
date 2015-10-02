@@ -22,6 +22,7 @@ public class MyListAdapter implements ListAdapter {
     List<Day> days;
     List<Day> alldays;
     List<Boolean> weekends;
+    int current;
 
     MyListAdapter(List<Day> inalldays) {
         List<Day> out = new ArrayList<>();
@@ -88,6 +89,7 @@ public class MyListAdapter implements ListAdapter {
                 v = days.get(position).setCurrentView(vi);
                 Animation animation = AnimationUtils.loadAnimation(parent.getContext(), R.anim.slide_in_right);
                 v.startAnimation(animation);
+                current = position;
                 return v;
             } catch (ParseException e) {
                 e.printStackTrace();
