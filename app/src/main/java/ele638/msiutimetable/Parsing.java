@@ -1,5 +1,6 @@
 package ele638.msiutimetable;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
  */
 public class Parsing {
     private static Workbook myWorkBook;
+    private static ArrayList<String> groupnames;
 
     public static void openFile(File filename) {
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
@@ -56,17 +58,17 @@ public class Parsing {
     }
 
     public static ArrayList<String> readGroups(int inCourse) {
-        ArrayList<String> out = new ArrayList<>();
+        groupnames = new ArrayList<>();
         HSSFRow myRow = (HSSFRow) myWorkBook.getSheetAt(inCourse).getRow(0);
         for (int i = 2; i < myRow.getLastCellNum(); i += 2) {
-            out.add(myRow.getCell(i).toString().replace(".0", ""));
+            groupnames.add(myRow.getCell(i).toString().replace(".0", ""));
         }
-        return out;
+        return groupnames;
     }
 
-    public static ArrayList<Week> readExcelFile() {
+    public static void readExcelFile(Context ctx) {
         HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(MainActivity.SAVED_COURSE);
-        return processMSIU(mySheet, MainActivity.SAVED_TIME, MainActivity.SAVED_GROUP);
+        processMSIU(ctx, mySheet, MainActivity.SAVED_TIME, MainActivity.SAVED_GROUP);
     }
 
     public static boolean isExternalStorageReadOnly() {
@@ -80,18 +82,15 @@ public class Parsing {
     }
 
 
-    public static ArrayList<Week> processMSIU(HSSFSheet mySheet, int time, int groupnum) {
+    public static void processMSIU(Context ctx, HSSFSheet mySheet, int time, int groupnum) {
         int rowPos = 1;
-        Week weekdaych = new Week(0);
-        Week weekdaynech = new Week(1);
-        ArrayList<Week> week = new ArrayList<>();
+        MainActivity.db = new DatabaseHandler(ctx, MainActivity.SAVED_BASENAME);
+        MainActivity.db.deleteAll();
         //Парсер для дневной формы обучения
         if (time == 0) {
             //Идем по всей неделе
             for (int i = 0; i < 6; i++) {
                 //Идем по дням
-                Day daych = new Day(i);
-                Day daynech = new Day(i);
                 for (int j = 0; j < 6; j++) {
                     //Идем по часам, сначала первые две строчки - четные дни
                     for (int k = 0; k < 2; k++) {
@@ -99,11 +98,11 @@ public class Parsing {
                         if (!flag) {
                             switch (k) {
                                 case 0:
-                                    daych.add(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), i);
                                     Log.d("NORM", "Добавлена пара в четный день");
                                     break;
                                 case 1:
-                                    daynech.add(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 6 + i);
                                     Log.d("NORM", "Добавлена пара в нечетный день");
                                     break;
                             }
@@ -111,19 +110,12 @@ public class Parsing {
                         rowPos += 2;
                     }
                 }
-                weekdaych.add(daych);
-                weekdaynech.add(daynech);
             }
-            week.add(weekdaych);
-            week.add(weekdaynech);
-            return week;
         } else
         //Парсер для вечерки
         {
             //Идем по будням
             for (int i = 0; i < 5; i++) {
-                Day daych = new Day(i);
-                Day daynech = new Day(i);
                 //Будни вечерки
                 for (int j = 0; j < 2; j++) {
                     //Идем по часам, сначала первые две строчки - четные дни
@@ -132,11 +124,11 @@ public class Parsing {
                         if (!flag) {
                             switch (k) {
                                 case 0:
-                                    daych.add(analyze((6 + j), mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), i);
                                     Log.d("NORM", "Добавлена пара в четный день");
                                     break;
                                 case 1:
-                                    daynech.add(analyze((6 + j), mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 6 + i);
                                     Log.d("NORM", "Добавлена пара в нечетный день");
                                     break;
                             }
@@ -144,23 +136,19 @@ public class Parsing {
                         rowPos += 2;
                     }
                 }
-                weekdaych.add(daych);
-                weekdaynech.add(daynech);
             }
             //Суббота вечерки
-            Day daych = new Day(5);
-            Day daynech = new Day(5);
             for (int j = 0; j < 6; j++) {
                 for (int k = 0; k < 2; k++) {
                     Boolean flag = (exept(mySheet.getRow(rowPos), groupnum) == 1);
                     if (!flag) {
                         switch (k) {
                             case 0:
-                                daych.add(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                MainActivity.db.setSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 5);
                                 Log.d("NORM", "Добавлена пара в четный день");
                                 break;
                             case 1:
-                                daynech.add(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum));
+                                MainActivity.db.setSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 11);
                                 Log.d("NORM", "Добавлена пара в нечетный день");
                                 break;
                         }
@@ -168,11 +156,6 @@ public class Parsing {
                     rowPos += 2;
                 }
             }
-            weekdaych.add(daych);
-            weekdaynech.add(daynech);
-            week.add(weekdaych);
-            week.add(weekdaynech);
-            return week;
         }
     }
 

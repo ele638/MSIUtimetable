@@ -18,7 +18,7 @@ import java.util.List;
 public class Day {
 
     public static String[] daynames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
-    List<Subject> subjects;
+    public List<Subject> subjects;
     String dayName;
     int id;
 
@@ -32,6 +32,9 @@ public class Day {
         subjects.add(inSubject);
     }
 
+    public int getIndex(Subject subject) {
+        return subjects.indexOf(subject);
+    }
     public int size() {
         return subjects.size();
     }
@@ -42,6 +45,10 @@ public class Day {
 
     public int getId() {
         return id;
+    }
+
+    public void deleteSubject(Subject subject) {
+        subjects.set(subjects.indexOf(subject), null);
     }
 
     public boolean isEmpty() {
@@ -77,7 +84,14 @@ public class Day {
         title.setText(dayName);
         layout.addView(header, 0);
         for (int i = 0; i < subjects.size(); i++) {
-            layout.addView(subjects.get(i).setView(inflater), i + 1);
+            if (subjects.get(i) == null) {
+                View element = inflater.inflate(R.layout.empty_element_layout, null, false);
+                TextView time = (TextView) element.findViewById(R.id.time);
+                time.setText(Subject.getTime(i)[0] + "\n" + Subject.getTime(i)[1]);
+                layout.addView(element, i + 1);
+            } else {
+                layout.addView(subjects.get(i).setView(inflater), i + 1);
+            }
         }
         return view;
     }

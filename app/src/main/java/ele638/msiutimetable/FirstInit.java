@@ -73,6 +73,7 @@ public class FirstInit {
         builder.setTitle("Выберите группу");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
+                MainActivity.SAVED_BASENAME = items[item].toString();
                 MainActivity.SAVED_GROUP = 2 + item * 2;
                 MainActivity.title = items[item].toString();
                 MainActivity.handler.sendEmptyMessage(MainActivity.SELECTED);

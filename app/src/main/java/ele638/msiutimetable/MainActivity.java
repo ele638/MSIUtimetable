@@ -10,7 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -36,9 +36,12 @@ public class MainActivity extends AppCompatActivity {
     static int TEXT_SIZE = 14;
     static boolean INITIALIZED;
     static String title;
+    static String SAVED_BASENAME;
     static ArrayList<Week> week;
     static Week selected_week;
     static Handler handler;
+    static DatabaseHandler db;
+    static boolean edit_mode = false;
     SharedPreferences sPref;
     SharedPreferences.Editor ed;
     ViewPager viewPager;
@@ -49,12 +52,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void init() {
         Parsing.openFile(msiu);
-        week = Parsing.readExcelFile();
+        db = new DatabaseHandler(getApplicationContext(), SAVED_BASENAME);
+        week = db.getWeeks();
         selected_week = week.get(current_week % 2);
         viewPager.setAdapter(pagerAdapter);
         CustomFont.setCustomFont(this, viewPager);
         viewPager.setCurrentItem((current_week % 2), true);
-
     }
 
     public void saveParam() {
@@ -66,10 +69,12 @@ public class MainActivity extends AppCompatActivity {
         ed.putBoolean("init", INITIALIZED);
         ed.putString("titleName", title);
         ed.putString("title", title);
+        ed.putString("BaseName", SAVED_BASENAME);
         ed.commit();
     }
 
     public void paramLoad() {
+        SAVED_BASENAME = sPref.getString("BaseName", "0");
         SAVED_TIME = sPref.getInt("Time", 0);
         SAVED_COURSE = sPref.getInt("Course", 0);
         SAVED_GROUP = sPref.getInt("Group", 0);
@@ -99,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         pd.setMessage("Загружаем данные");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setIndeterminate(true);
+
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -117,28 +123,25 @@ public class MainActivity extends AppCompatActivity {
                     case SELECTED:
                         saveParam();
                         setTitle(title);
+                        Parsing.readExcelFile(getApplicationContext());
                         init();
                         break;
                 }
             }
         };
 
-
-
-        paramLoad();
-        INITIALIZED = sPref.getBoolean("init", false);
-        if (!INITIALIZED) {
+//        INITIALIZED = sPref.getBoolean("init", false);
+//        if (!INITIALIZED) {
             FirstInit.showDialog(MainActivity.this);
-        } else {
-            paramLoad();
-            setTitle(sPref.getString("title", "MSIU timetable"));
-            try {
-                init();
-            } catch (Exception e) {
-                FirstInit.showDialog(MainActivity.this);
-            }
-
-        }
+//        } else {
+//            paramLoad();
+//            setTitle(sPref.getString("title", "MSIU timetable"));
+//            try {
+//                init();
+//            } catch (Exception e) {
+//                FirstInit.showDialog(MainActivity.this);
+//            }
+//        }
 
     }
 
@@ -159,6 +162,11 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (id == R.id.setdefault) {
+            db.deleteAll();
+            handler.sendEmptyMessage(SELECTED);
+            ((MenuItem) findViewById(R.id.editMode)).setChecked(false);
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.change) {
             SAVED_GROUP = 0;
@@ -212,11 +220,31 @@ public class MainActivity extends AppCompatActivity {
             alert.show();
         }
 
+        if (id == R.id.editMode) {
+            if (item.isChecked()) {
+                week = db.getWeeks();
+                selected_week = week.get(current_week % 2);
+                viewPager.setAdapter(pagerAdapter);
+                CustomFont.setCustomFont(this, viewPager);
+                viewPager.setCurrentItem((current_week % 2), true);
+                edit_mode = false;
+                item.setChecked(false);
+            } else {
+                week = db.getAllWeeks();
+                selected_week = week.get(current_week % 2);
+                viewPager.setAdapter(pagerAdapter);
+                CustomFont.setCustomFont(this, viewPager);
+                viewPager.setCurrentItem((current_week % 2), true);
+                edit_mode = true;
+                item.setChecked(true);
+            }
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
 
-    private class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+    private class MyFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
         public MyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);

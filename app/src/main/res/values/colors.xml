@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="pink">#C62828</color>
-    <color name="primary">#B71C1C</color>
+    <color name="pink">#872642</color>
+    <color name="primary">#701f37</color>
     <color name="textColorPrimary">#FCE4EC</color>
     <color name="colorBackground">#D32F2F</color>
+    <color name="colorAccent">#872642</color>
     <color name="cardAccent">#c7ffe4</color>
 </resources>

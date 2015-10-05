@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.text.ParseException;
+import java.util.Arrays;
 
 public class Subject {
     public static String times[][] = {
@@ -35,6 +36,10 @@ public class Subject {
         place = inPlace;
         time = times[inTime];
         id = this.hashCode();
+    }
+
+    public static String[] getTime(int order) {
+        return times[order];
     }
 
     public boolean isCurrent(String inTime) throws ParseException {
@@ -71,5 +76,14 @@ public class Subject {
 
     public int getId() {
         return id;
+    }
+
+    //Несколько служебных функций.
+    public int getOrder() {
+        return Arrays.asList(times).indexOf(time);
+    }
+
+    public String toString() {
+        return String.format("%s, %s, %s, %s, %s - %s.", subject, teacher, type, place, time[0], time[1]);
     }
 }

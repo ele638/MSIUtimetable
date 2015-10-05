@@ -7,37 +7,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
  * Created by ele638 on 28.09.15.
  */
-public class MyListAdapter implements ListAdapter {
+public class MyListAdapter extends BaseAdapter implements ListAdapter {
 
     List<Day> days;
-    List<Day> alldays;
-    List<Boolean> weekends;
-    int current;
 
-    MyListAdapter(List<Day> inalldays) {
-        List<Day> out = new ArrayList<>();
-        this.alldays = inalldays;
-        weekends = new ArrayList<>();
-        for (int i=0; i<alldays.size();i++){
-            if (alldays.get(i).isEmpty()){
-                weekends.add(true);
-            }
-            else{
-                out.add(alldays.get(i));
-                weekends.add(false);
-            }
-        }
-        this.days = out;
+    MyListAdapter(Week inDays) {
+        this.days = inDays.days;
     }
 
     public boolean areAllItemsEnabled() {
@@ -47,6 +30,11 @@ public class MyListAdapter implements ListAdapter {
     @Override
     public boolean isEnabled(int position) {
         return true;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
     }
 
     @Override
@@ -83,21 +71,8 @@ public class MyListAdapter implements ListAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater vi = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = days.get(position).setView(vi);
-        int i = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 2 ;
-        if (alldays.indexOf(days.get(position))==i){
-            try {
-                v = days.get(position).setCurrentView(vi);
-                Animation animation = AnimationUtils.loadAnimation(parent.getContext(), R.anim.slide_in_right);
-                v.startAnimation(animation);
-                current = position;
-                return v;
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
         Animation animation = AnimationUtils.loadAnimation(parent.getContext(), R.anim.slide_in_right);
         v.startAnimation(animation);
-
         return v;
     }
 

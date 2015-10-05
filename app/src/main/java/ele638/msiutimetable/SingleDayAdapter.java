@@ -5,14 +5,16 @@ import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 
 import java.util.List;
 
 /**
  * Created by ele638 on 29.09.15.
  */
-public class SingleDayAdapter implements ListAdapter {
+public class SingleDayAdapter extends BaseAdapter implements ListAdapter {
 
     List<Subject> subjectList;
     String dayname;
@@ -43,6 +45,11 @@ public class SingleDayAdapter implements ListAdapter {
     }
 
     @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+    }
+
+    @Override
     public int getCount() {
         return subjectList.size();
     }
@@ -54,6 +61,9 @@ public class SingleDayAdapter implements ListAdapter {
 
     @Override
     public long getItemId(int position) {
+        if (subjectList.get(position) == null) {
+            return 0;
+        }
         return subjectList.get(position).getId();
     }
 
@@ -65,8 +75,15 @@ public class SingleDayAdapter implements ListAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = subjectList.get(position).setView(inflater);
-        return v;
+        if (subjectList.get(position) == null) {
+            View element = inflater.inflate(R.layout.empty_element_layout, null, false);
+            TextView time = (TextView) element.findViewById(R.id.time);
+            time.setText(Subject.getTime(position)[0] + "\n" + Subject.getTime(position)[1]);
+            return element;
+        } else {
+            return subjectList.get(position).setView(inflater);
+        }
+
     }
 
     @Override

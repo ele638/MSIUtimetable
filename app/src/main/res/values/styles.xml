@@ -1,10 +1,12 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarStyle">@style/Widget.AppTheme.ActionBar</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppTheme.ActionBar</item>
         <item name="actionBarPopupTheme">@style/ThemeOverlay.AppTheme.PopupMenu</item>
+        <item name="android:button">@drawable/abc_btn_check_material</item>
+        <item name="android:buttonTint" tools:targetApi="lollipop">@color/colorAccent</item>
     </style>
 
     <style name="Widget.AppTheme.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
@@ -28,9 +30,9 @@
 
     <style name="ThemeOverlay.AppTheme.PopupMenu" parent="ThemeOverlay.AppCompat.Dark">
         <!-- popup menu background - NEVER "android:background" !!! in themes -->
-        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="android:colorBackground">@android:color/background_dark</item>
         <!-- popup menu item text color -->
-        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
     </style>
 
 </resources>

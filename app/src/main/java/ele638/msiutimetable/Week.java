@@ -8,8 +8,8 @@ import java.util.List;
  */
 public class Week {
 
+    public List<Day> days;
     int weekType;
-    List<Day> days;
 
     Week(int inweekType) {
         weekType = inweekType;
@@ -24,16 +24,17 @@ public class Week {
         return days.get(i);
     }
 
+    public void deleteDay(Day day) {
+        days.set(days.indexOf(day), null);
+    }
+
     public List<Day> getAllDays() {
         return days;
     }
 
-    public List<Day> getDays() {
-        List<Day> out = new ArrayList<>();
-        for (int i = 0; i < days.size(); i++) {
-            if (!days.get(i).isEmpty()) out.add(days.get(i));
-        }
-        return out;
+    public boolean isEmpty() {
+        return days.isEmpty();
     }
+
 
 }

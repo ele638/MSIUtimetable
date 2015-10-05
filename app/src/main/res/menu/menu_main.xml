@@ -16,4 +16,13 @@
         android:id="@+id/textSize"
         android:orderInCategory="4"
         android:title="Размер шрифта" />
+    <item
+        android:id="@+id/editMode"
+        android:checkable="true"
+        android:orderInCategory="5"
+        android:title="Режим изменения" />
+    <item
+        android:id="@+id/setdefault"
+        android:orderInCategory="6"
+        android:title="Вернуть на заводские настройки" />
 </menu>
