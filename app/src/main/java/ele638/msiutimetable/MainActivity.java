@@ -26,43 +26,54 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
+    //Коды для handler'а
     static final int EXIT_CODE = 0;
     static final int DOWNLOAD_CODE = 1;
     static final int DOWNLOADED_FILE = 2;
     static final int SELECTED = 3;
-    static int SAVED_TIME;
+    //Наполнение SharedPreferences
+    static int SAVED_EVENING;
     static int SAVED_COURSE;
     static int SAVED_GROUP;
     static int TEXT_SIZE = 14;
     static boolean INITIALIZED;
     static String title;
     static String SAVED_BASENAME;
-    static ArrayList<Week> week;
-    static Week selected_week;
-    static Handler handler;
-    static DatabaseHandler db;
     static boolean edit_mode = false;
     SharedPreferences sPref;
     SharedPreferences.Editor ed;
+    //Данные класса
+    static ArrayList<Week> week;
+    static Handler handler;
+    static DatabaseHandler db;
+    static int current_week;
+    //Различные view и прочий хлам
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
     File msiu;
     ProgressDialog pd;
-    int current_week;
+
+
+    //Метод запуска после сборки/обновления всех данных
 
     public void init() {
-        Parsing.openFile(msiu);
+        //Заполняем БД
         db = new DatabaseHandler(getApplicationContext(), SAVED_BASENAME);
+        //Заполняем ArrayList'ы
         week = db.getWeeks();
-        selected_week = week.get(current_week % 2);
-        viewPager.setAdapter(pagerAdapter);
+        //Если при присвоении адаптера возник сбой, то запустить первоначальную инициализацию
+        try{viewPager.setAdapter(pagerAdapter);} catch (Exception e){FirstInit.showDialog(this);
+        }
+        //Устанавливаем кастомный шрифт
         CustomFont.setCustomFont(this, viewPager);
+        //Устанавливаем viewPager на текущую неделю
         viewPager.setCurrentItem((current_week % 2), true);
     }
 
+    //Сохранение данных в sharedPreferences
     public void saveParam() {
         INITIALIZED = true;
-        ed.putInt("Time", SAVED_TIME);
+        ed.putInt("Time", SAVED_EVENING);
         ed.putInt("Course", SAVED_COURSE);
         ed.putInt("Group", SAVED_GROUP);
         ed.putInt("TextSize", TEXT_SIZE);
@@ -73,14 +84,16 @@ public class MainActivity extends AppCompatActivity {
         ed.commit();
     }
 
+    //Загрузка данных из sharedPreferences
     public void paramLoad() {
         SAVED_BASENAME = sPref.getString("BaseName", "0");
-        SAVED_TIME = sPref.getInt("Time", 0);
+        SAVED_EVENING = sPref.getInt("Time", 0);
         SAVED_COURSE = sPref.getInt("Course", 0);
         SAVED_GROUP = sPref.getInt("Group", 0);
         TEXT_SIZE = sPref.getInt("TextSize", 14);
         title = sPref.getString("titleName", "MSIU");
     }
+
 
 
     @Override
@@ -104,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         pd.setMessage("Загружаем данные");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setIndeterminate(true);
+
 
         handler = new Handler() {
             @Override
@@ -130,18 +144,20 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-//        INITIALIZED = sPref.getBoolean("init", false);
-//        if (!INITIALIZED) {
+        INITIALIZED = sPref.getBoolean("init", false);
+        if (!INITIALIZED) {
             FirstInit.showDialog(MainActivity.this);
-//        } else {
-//            paramLoad();
-//            setTitle(sPref.getString("title", "MSIU timetable"));
-//            try {
-//                init();
-//            } catch (Exception e) {
-//                FirstInit.showDialog(MainActivity.this);
-//            }
-//        }
+        } else {
+            paramLoad();
+            setTitle(sPref.getString("title", "MSIU timetable"));
+            try {
+                //Открываем файл
+                Parsing.openFile(msiu);
+                init();
+            } catch (Exception e) {
+                FirstInit.showDialog(MainActivity.this);
+            }
+        }
 
     }
 
@@ -165,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.setdefault) {
             db.deleteAll();
             handler.sendEmptyMessage(SELECTED);
-            ((MenuItem) findViewById(R.id.editMode)).setChecked(false);
+            edit_mode=false;
         }
         //noinspection SimplifiableIfStatement
         if (id == R.id.change) {
@@ -221,20 +237,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.editMode) {
+
             if (item.isChecked()) {
                 week = db.getWeeks();
-                selected_week = week.get(current_week % 2);
                 viewPager.setAdapter(pagerAdapter);
                 CustomFont.setCustomFont(this, viewPager);
-                viewPager.setCurrentItem((current_week % 2), true);
                 edit_mode = false;
                 item.setChecked(false);
             } else {
-                week = db.getAllWeeks();
-                selected_week = week.get(current_week % 2);
+                week = db.getAllWeeks(MainActivity.SAVED_EVENING);
                 viewPager.setAdapter(pagerAdapter);
                 CustomFont.setCustomFont(this, viewPager);
-                viewPager.setCurrentItem((current_week % 2), true);
                 edit_mode = true;
                 item.setChecked(true);
             }
@@ -249,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         public MyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
 
         @Override
         public Fragment getItem(int position) {

@@ -42,14 +42,14 @@ public class FirstInit {
         builder.setTitle("Выберите форму обучения");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                MainActivity.SAVED_TIME = item;
+                MainActivity.SAVED_EVENING = item;
                 showCourseDialog(context, item);
             }
         });
         AlertDialog alert = builder.create();
         alert.show();
     }
-
+    //Алерт выбора курса
     public static void showCourseDialog(final Context context, int item) {
         ArrayList<String> courses = Parsing.readCourses().get(item);
         CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
@@ -57,26 +57,38 @@ public class FirstInit {
         builder.setTitle("Выберите курс");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                MainActivity.SAVED_COURSE = item * 2 + MainActivity.SAVED_TIME;
+                MainActivity.SAVED_COURSE = item * 2 + MainActivity.SAVED_EVENING;
                 showGroupDialog(context);
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                showTimeDialog(context);
             }
         });
         AlertDialog alert = builder.create();
         alert.show();
     }
 
-
-    public static void showGroupDialog(Context context) {
+    //Алерт выбора группы
+    public static void showGroupDialog(final Context context) {
         ArrayList<String> courses = Parsing.readGroups(MainActivity.SAVED_COURSE);
         final CharSequence[] items = courses.toArray(new CharSequence[courses.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Выберите группу");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                MainActivity.SAVED_BASENAME = items[item].toString();
+                MainActivity.SAVED_BASENAME = items[item].toString()+".db";
                 MainActivity.SAVED_GROUP = 2 + item * 2;
                 MainActivity.title = items[item].toString();
                 MainActivity.handler.sendEmptyMessage(MainActivity.SELECTED);
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                showCourseDialog(context,MainActivity.SAVED_EVENING);
             }
         });
         AlertDialog alert = builder.create();

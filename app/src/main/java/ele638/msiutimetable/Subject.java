@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import java.text.ParseException;
 import java.util.Arrays;
 
 public class Subject {
@@ -42,8 +41,7 @@ public class Subject {
         return times[order];
     }
 
-    public boolean isCurrent(String inTime) throws ParseException {
-
+    public boolean isCurrent(String inTime) {
         return (inTime.compareTo(time[0]) > 0 && inTime.compareTo(time[1]) < 0);
     }
 

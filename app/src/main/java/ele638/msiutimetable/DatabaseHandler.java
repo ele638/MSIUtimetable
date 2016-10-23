@@ -121,17 +121,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return d;
     }
 
-    public Day getAllDay(int day) {
+    public Day getAllDay(int day, int vech) {
         int _day = day < 6 ? day : day - 6;
         Day d = new Day(_day);
-        for (int i = 0; i < 8; i++) d.add(getSubject(day, i));
+        if (vech == 0) for (int i = 0; i < 6; i++) d.add(getSubject(day, i));
+        else for (int i = 0; i < 8; i++) d.add(getSubject(day, i));
         return d;
     }
 
     public Week getWeek(int weekType) {
         int i = weekType * 6;
         int j = i + 6;
-        Week week = new Week(weekType);
+        Week week = new Week();
         Day day;
         for (; i < j; i++)
             if ((day = getDay(i)) != null)
@@ -142,11 +143,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return week;
     }
 
-    public Week getAllWeek(int weekType) {
+    public Week getAllWeek(int weekType, int vech) {
         int i = weekType * 6;
         int j = i + 6;
-        Week week = new Week(weekType);
-        for (; i < j; i++) week.add(getAllDay(i));
+        Week week = new Week();
+        for (; i < j; i++) week.add(getAllDay(i, vech));
         return week;
     }
 
@@ -158,10 +159,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return out;
     }
 
-    public ArrayList<Week> getAllWeeks() {
+    public ArrayList<Week> getAllWeeks(int vech) {
         ArrayList<Week> out = new ArrayList<>();
-        out.add(getAllWeek(0));
-        out.add(getAllWeek(1));
+        out.add(getAllWeek(0, vech));
+        out.add(getAllWeek(1, vech));
         return out;
     }
 

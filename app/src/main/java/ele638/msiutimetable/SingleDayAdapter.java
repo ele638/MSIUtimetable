@@ -44,9 +44,10 @@ public class SingleDayAdapter extends BaseAdapter implements ListAdapter {
 
     }
 
-    @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
+    public void updateDataSet(List<Subject> inSubjects) {
+        subjectList.clear();
+        subjectList.addAll(inSubjects);
+        this.notifyDataSetChanged();
     }
 
     @Override

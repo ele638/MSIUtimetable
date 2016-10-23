@@ -68,7 +68,7 @@ public class Parsing {
 
     public static void readExcelFile(Context ctx) {
         HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(MainActivity.SAVED_COURSE);
-        processMSIU(ctx, mySheet, MainActivity.SAVED_TIME, MainActivity.SAVED_GROUP);
+        processMSIU(ctx, mySheet, MainActivity.SAVED_EVENING, MainActivity.SAVED_GROUP);
     }
 
     public static boolean isExternalStorageReadOnly() {
@@ -81,6 +81,30 @@ public class Parsing {
         return Environment.MEDIA_MOUNTED.equals(extStorageState);
     }
 
+    public static void processMSIUSingleDay(int day, int pageNumber) {
+        HSSFSheet mySheet = (HSSFSheet) myWorkBook.getSheetAt(MainActivity.SAVED_COURSE);
+        int groupnum = MainActivity.SAVED_GROUP;
+        int time = MainActivity.SAVED_EVENING;
+        MainActivity.db.deleteDay(day + 6*pageNumber);
+        if (time == 0) {
+            int rowPos = 1 + 24 * day;
+            for (int j = 0; j < 6; j++) {
+                Boolean flag = (exept(mySheet.getRow(rowPos), groupnum) == 1);
+                if (!flag)
+                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), day + pageNumber * 6);
+                rowPos += 4;
+            }
+        } else {
+            int rowPos = 1 + 8 * day;
+            for (int j = 0; j < (day == 5 ? 6 : 2); j++) {
+                Boolean flag = (exept(mySheet.getRow(rowPos), groupnum) == 1);
+                if (!flag)
+                    MainActivity.db.addSubject(analyze(6 + j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), day + pageNumber * 6);
+                rowPos += 4;
+            }
+        }
+    }
+
 
     public static void processMSIU(Context ctx, HSSFSheet mySheet, int time, int groupnum) {
         int rowPos = 1;
@@ -90,7 +114,7 @@ public class Parsing {
         if (time == 0) {
             //Идем по всей неделе
             for (int i = 0; i < 6; i++) {
-                //Идем по дням
+                //Идем по дню
                 for (int j = 0; j < 6; j++) {
                     //Идем по часам, сначала первые две строчки - четные дни
                     for (int k = 0; k < 2; k++) {
@@ -124,11 +148,11 @@ public class Parsing {
                         if (!flag) {
                             switch (k) {
                                 case 0:
-                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), i);
+                                    MainActivity.db.addSubject(analyze(6 + j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), i);
                                     Log.d("NORM", "Добавлена пара в четный день");
                                     break;
                                 case 1:
-                                    MainActivity.db.addSubject(analyze(j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 6 + i);
+                                    MainActivity.db.addSubject(analyze(6 + j, mySheet.getRow(rowPos), mySheet.getRow(rowPos + 1), groupnum), 6 + i);
                                     Log.d("NORM", "Добавлена пара в нечетный день");
                                     break;
                             }

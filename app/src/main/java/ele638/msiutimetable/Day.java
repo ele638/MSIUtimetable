@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -35,6 +34,8 @@ public class Day {
     public int getIndex(Subject subject) {
         return subjects.indexOf(subject);
     }
+
+
     public int size() {
         return subjects.size();
     }
@@ -55,7 +56,7 @@ public class Day {
         return subjects.isEmpty();
     }
 
-    public View setCurrentView(LayoutInflater inflater) throws ParseException {
+    public View setCurrentView(LayoutInflater inflater) {
         View view = inflater.inflate(R.layout.day_layout, null, false);
         CardView dayview = (CardView) view.findViewById(R.id.card);
         dayview.setCardBackgroundColor(Color.rgb(195, 255, 228));
@@ -66,10 +67,17 @@ public class Day {
         String current_time = String.format("%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) + ":" + String.format("%02d", Calendar.getInstance().get(Calendar.MINUTE));
         layout.addView(header, 0);
         for (int i = 0; i < subjects.size(); i++) {
-            if (subjects.get(i).isCurrent(current_time)) {
-                layout.addView(subjects.get(i).setCurrentView(inflater), i + 1);
+            if (subjects.get(i) == null) {
+                View element = inflater.inflate(R.layout.empty_element_layout, null, false);
+                TextView time = (TextView) element.findViewById(R.id.time);
+                time.setText(Subject.getTime(i)[0] + "\n" + Subject.getTime(i)[1]);
+                layout.addView(element, i + 1);
             } else {
-                layout.addView(subjects.get(i).setView(inflater), i + 1);
+                if (subjects.get(i).isCurrent(current_time)) {
+                    layout.addView(subjects.get(i).setCurrentView(inflater), i + 1);
+                } else {
+                    layout.addView(subjects.get(i).setView(inflater), i + 1);
+                }
             }
         }
         return view;

@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -18,9 +19,13 @@ import java.util.List;
 public class MyListAdapter extends BaseAdapter implements ListAdapter {
 
     List<Day> days;
+    List<Day> alldays;
+    int pageNumber;
 
-    MyListAdapter(Week inDays) {
+    MyListAdapter(Week inDays, int pageNumber) {
         this.days = inDays.days;
+        this.pageNumber = pageNumber;
+        this.alldays = MainActivity.db.getAllWeeks(MainActivity.SAVED_EVENING).get(pageNumber).days;
     }
 
     public boolean areAllItemsEnabled() {
@@ -70,7 +75,14 @@ public class MyListAdapter extends BaseAdapter implements ListAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater vi = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = days.get(position).setView(vi);
+        View v;
+        Calendar day = Calendar.getInstance();
+        int currday = day.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+        if (MainActivity.current_week == pageNumber && alldays.get(currday).dayName == days.get(position).dayName ){
+            v = days.get(position).setCurrentView(vi);
+        }else {
+            v = days.get(position).setView(vi);
+        }
         Animation animation = AnimationUtils.loadAnimation(parent.getContext(), R.anim.slide_in_right);
         v.startAnimation(animation);
         return v;

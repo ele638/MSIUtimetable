@@ -1,9 +1,11 @@
 package ele638.msiutimetable;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.os.Looper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,7 +37,9 @@ class Downloading extends AsyncTask<String, Integer, Boolean>{
     }
 
 
+
     protected Boolean doInBackground(String... params) {
+        Looper.prepare();
         try {
             //set the download URL, a url that points to a file on the internet
             //this is the file to be downloaded
@@ -75,16 +79,32 @@ class Downloading extends AsyncTask<String, Integer, Boolean>{
             fileOutput.close();
 //catch some possible errors...
         } catch (MalformedURLException e) {
-            Log.e("Download", e.toString());
-            e.printStackTrace();
+            errorAlert();
+            Looper.loop();
         } catch (IOException e) {
-            Log.e("Download", e.toString());
-            e.printStackTrace();
+            errorAlert();
+            Looper.loop();
         } catch (Exception e) {
-            Log.e("Download", e.toString());
-            e.printStackTrace();
+            errorAlert();
+            Looper.loop();
         }
         return false;
+    }
+
+    public void errorAlert(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        final AlertDialog alertDialog;
+        builder.setTitle("Ошибка загрузки");
+        builder.setMessage("Произошла ошибка загрузки файла, проверьте соединение с интернетом и перезапустите приложение");
+        builder.setCancelable(false);
+        builder.setNegativeButton("ОК", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                MainActivity.handler.sendEmptyMessage(EXIT_CODE);
+            }
+        });
+        alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override
