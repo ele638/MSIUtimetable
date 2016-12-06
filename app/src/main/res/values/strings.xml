@@ -7,7 +7,6 @@
     <string name="place">place</string>
     <string name="type">type</string>
     <string name="dayweek">Dayweek</string>
-    <string name="weekch">Четная неделя</string>
-    <string name="weeknech">Нечетная неделя</string>
+    <string name="reload">Перезагрузить</string>
 
 </resources>

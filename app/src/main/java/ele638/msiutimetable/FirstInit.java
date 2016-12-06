@@ -8,19 +8,28 @@ import android.content.DialogInterface;
 import java.io.File;
 import java.util.ArrayList;
 
-/**
- * Created by ele638 on 23.09.15.
- */
-public class FirstInit {
+class FirstInit {
 
-    protected Boolean flag;
-    protected String path;
-    protected AlertDialog alert;
-    protected static Context ctx;
-    protected ProgressDialog pd;
-    protected static File mfile;
+    private static Context ctx;
+    private static File mfile;
+    private String path;
+    private AlertDialog alert;
+    private ProgressDialog pd;
 
-    public void showDialog(String inPath, Context context, ProgressDialog inPD, File infile) {
+    static void showGroupDialog(ArrayList<String> list) {
+        CharSequence[] items = list.toArray(new CharSequence[list.size()]);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        builder.setTitle("Выберите группу");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                MainActivity.week = Parsing.readExcelFile(mfile.getAbsolutePath(), item);
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    void showDialog(String inPath, Context context, ProgressDialog inPD, File infile) {
         ctx = context;
         path = inPath;
         pd = inPD;
@@ -40,24 +49,11 @@ public class FirstInit {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alert.dismiss();
-                new Downloading(ctx, pd, mfile).execute(path);
+                new Downloading(pd, mfile).execute(path);
 
             }
         });
         alert = alertBuilder.create();
-        alert.show();
-    }
-
-    public static void showGroupDialog(ArrayList<String> list){
-        CharSequence[] items = list.toArray(new CharSequence[list.size()]);
-        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-        builder.setTitle("Выберите группу");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                Parsing.readExcelFile(mfile.getAbsolutePath(), (2+item*2));
-            }
-        });
-        AlertDialog alert = builder.create();
         alert.show();
     }
 
